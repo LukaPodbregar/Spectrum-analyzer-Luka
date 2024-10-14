@@ -24,6 +24,7 @@ struct shift_reg_srtuct {
     unsigned char PLL_SA_DATA;
     unsigned char PLL_SA_LE;
     unsigned char PLL_SA_RF_EN;
+    unsigned char PLL_SA_MOSI;
 
     unsigned char PLL_TG_CLK;
     unsigned char PLL_TG_DATA;
@@ -34,12 +35,19 @@ struct shift_reg_srtuct {
     unsigned char Xtal_10k;
     unsigned char Xtal_3k;
     unsigned char Xtal_1k;
+    unsigned char Xtal_SEL;
+
 
     unsigned char LC_3M;
     unsigned char LC_1M;
     unsigned char LC_300k;
     unsigned char LC_100k;
     unsigned char LC_30k;
+    unsigned char LC_SEL;
+
+    unsigned char LO2_LOCK;
+
+    unsigned char LO1_LOCK;
 
     unsigned char Att_SA_CLK;
     unsigned char Att_SA_DATA;
@@ -57,6 +65,8 @@ struct shift_reg_srtuct {
     unsigned char LED_reg2;
     unsigned char LED_reg3;
     unsigned char LED_reg4;
+    unsigned char LED_OK;
+    unsigned char LED_ERR;
 
     unsigned char LE1;
     unsigned char LE2;
