@@ -67,15 +67,13 @@ void init_attenuators(void){
     shift_reg.Att_SA_CLK = 0;
     shift_reg.Att_SA_DATA = 0;
 
+    /*
     shift_reg.Att_TG_LE = 0;
     shift_reg.Att_TG_CLK = 0;
     shift_reg.Att_TG_DATA = 0;
-
+    */
     sendDataToShiftRegisters();
 
     send_attenuator_SA(0b00000000); // minimum att
-    send_attenuator_TG(0b00000000); // minimum att
-
-    // set maximum attenuation
-    //attenuator_send(0b01111111); //default state
+    //send_attenuator_TG(0b00000000); // minimum att
 }

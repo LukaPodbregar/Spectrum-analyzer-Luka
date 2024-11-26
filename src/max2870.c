@@ -30,6 +30,35 @@ struct MAX2870_reg {
 struct MAX2870_reg MAX2870_PLL_SA;
 struct MAX2870_reg MAX2870_PLL_TG;
 
+void send_MAX2870_SA(unsigned char addr, unsigned int data_PLL1){
+    data_PLL1 &= 0xFFFFFFF8;
+    data_PLL1 |= (addr&0x00000007); // prepare data
+
+    int i = 32;
+    shift_reg.PLL_SA_LE = 0; // LE low
+    shift_reg.PLL_SA_DATA = 0;  // data low
+    sendDataToShiftRegisters();
+
+    //send data to MAX2870s
+    while(i){
+        shift_reg.PLL_SA_CLK = 0;
+        if(data_PLL1 & 0x80000000){
+            shift_reg.PLL_SA_DATA = 1;
+        }
+        else{
+            shift_reg.PLL_SA_DATA = 0;
+        }
+        sendDataToShiftRegisters();
+        data_PLL1 = data_PLL1<<1;
+        shift_reg.PLL_SA_CLK = 1;
+        sendDataToShiftRegisters();
+        i--;
+    }
+    shift_reg.PLL_SA_CLK = 0;
+    shift_reg.PLL_SA_LE = 1;
+    sendDataToShiftRegisters();
+}
+
 void send_MAX2870_double(unsigned char addr, unsigned int data_PLL1, unsigned int data_PLL2){
     data_PLL1 &= 0xFFFFFFF8;
     data_PLL1 |= (addr&0x00000007); // prepare data
@@ -77,6 +106,48 @@ void send_MAX2870_double(unsigned char addr, unsigned int data_PLL1, unsigned in
     shift_reg.PLL_TG_LE = 0;
     sendDataToShiftRegisters();
     */
+}
+
+void init_MAX2870_SA(void){
+    // Register address - SA
+    MAX2870_PLL_SA.R0_adr = 0x00;
+    MAX2870_PLL_SA.R1_adr = 0x01;
+    MAX2870_PLL_SA.R2_adr = 0x02;
+    MAX2870_PLL_SA.R3_adr = 0x03;
+    MAX2870_PLL_SA.R4_adr = 0x04;
+    MAX2870_PLL_SA.R5_adr = 0x05;
+    MAX2870_PLL_SA.R6_adr = 0x06;
+
+    // Default values - SA
+    MAX2870_PLL_SA.R0 = 0x80D38000; // 4230 MHz
+    MAX2870_PLL_SA.R1 = 0x80008011;
+    MAX2870_PLL_SA.R2 = 0x58011FC2;
+    MAX2870_PLL_SA.R3 = 0x0100000B;
+    MAX2870_PLL_SA.R4 = 0x608C8234;
+    MAX2870_PLL_SA.R5 = 0x01400005;
+    MAX2870_PLL_SA.R6 = 0; // read register
+
+    send_MAX2870_SA(MAX2870_PLL_SA.R5_adr, MAX2870_PLL_SA.R5);
+    delay_ms(20);
+
+    send_MAX2870_SA(MAX2870_PLL_SA.R4_adr, MAX2870_PLL_SA.R4);
+    send_MAX2870_SA(MAX2870_PLL_SA.R3_adr, MAX2870_PLL_SA.R3);
+    send_MAX2870_SA(MAX2870_PLL_SA.R2_adr, MAX2870_PLL_SA.R2);
+    send_MAX2870_SA(MAX2870_PLL_SA.R1_adr, MAX2870_PLL_SA.R1);
+    send_MAX2870_SA(MAX2870_PLL_SA.R0_adr, MAX2870_PLL_SA.R0);
+
+    send_MAX2870_SA(MAX2870_PLL_SA.R5_adr, MAX2870_PLL_SA.R5);
+    send_MAX2870_SA(MAX2870_PLL_SA.R4_adr, MAX2870_PLL_SA.R4);
+    send_MAX2870_SA(MAX2870_PLL_SA.R3_adr, MAX2870_PLL_SA.R3);
+    send_MAX2870_SA(MAX2870_PLL_SA.R2_adr, MAX2870_PLL_SA.R2);
+    send_MAX2870_SA(MAX2870_PLL_SA.R1_adr, MAX2870_PLL_SA.R1);
+    send_MAX2870_SA(MAX2870_PLL_SA.R0_adr, MAX2870_PLL_SA.R0);
+
+    shift_reg.PLL_SA_RF_EN = 1;
+    shift_reg.PLL_SA_DATA = 0;
+    shift_reg.PLL_SA_LE = 0;
+    shift_reg.PLL_SA_CLK = 0;
+    sendDataToShiftRegisters();
 }
 
 void init_MAX2870_double(void){

@@ -35,10 +35,10 @@ int main(void){
     init();
     init_delay();
     init_usart();
-    init_spi();
+    //init_spi(); // not using SPI
     usart_send_string("\n\rINFO:System boot - OK\n\r");
     usart_send_string("INFO:Waiting for regulators to stabilize\n\r");
-    delay_ms(100); // Delay for LDO to stabilize
+    delay_ms(1000); // Delay for LDO to stabilize
     init_shift_reg();
     usart_send_string("INFO:System comm bus - OK\n\r");
 
@@ -47,13 +47,16 @@ int main(void){
 
     // PLL start
     usart_send_string("INFO:VCO 2 SA - ");
-    init_MAX2870_double();
+    init_MAX2870_SA();
     temp = read_lock_status_MAX2870_SA(0);
     if(temp){
         usart_send_string("UNLOCKED\n\r");
     }else {
         usart_send_string("OK\n\r");
+        shift_reg.LED_LO2_LOCK = 1;
     }
+
+    /*
     usart_send_string("INFO:VCO 2 TG - ");
     temp = read_lock_status_MAX2870_TG(0);
     if(temp){
@@ -61,6 +64,7 @@ int main(void){
     }else {
         usart_send_string("OK\n\r");
     }
+    */
 
     init_LMX2491();
     delay_ms(10);
@@ -83,20 +87,38 @@ int main(void){
         usart_send_string("ERROR\n\r");
     }else {
         usart_send_string("OK\n\r");
+        shift_reg.LED_LO1_LOCK = 1;
     }
 
-    //spi_comm_start_frame();
+    if(shift_reg.LED_LO1_LOCK && shift_reg.LED_LO2_LOCK){
+        shift_reg.LED_ERR = 0;
+        shift_reg.LED_OK = 1;
+    }
+    sendDataToShiftRegisters();
+
 
     // System startup
     LED_ON;
+
+
+    //set_CW_frequency_STUW81300(7600000);
     while(1)
     {
         // TEST area
+        /*
         sweep_init(5000000,1000000,shift_reg);
         delay_ms(10);
         sweep_single();
         delay_ms(10);
+        */
         // TEST area
+
+        if(read_lock_status_STUW81300(0)){
+            shift_reg.LED_LO2_LOCK = 0;
+            shift_reg.LED_ERR = 1;
+            shift_reg.LED_OK = 0;
+            sendDataToShiftRegisters();
+        }
 
         if(decode_command){
             if(command_decode(buffer)){
@@ -165,8 +187,8 @@ void init()
     GPIOB->MODER &= ~(GPIO_MODER_MODE14_0 | GPIO_MODER_MODE14_1); // input
 
     // PLL 1-2 - STuW81300
-    GPIOA->MODER &= ~(GPIO_MODER_MODE9_1 | GPIO_MODER_MODE10_1 | GPIO_MODER_MODE11_1); // output
-    GPIOA->MODER &= ~GPIO_MODER_MODE12; // input
+    GPIOA->MODER &= ~(GPIO_MODER_MODE10_1 | GPIO_MODER_MODE11_1 | GPIO_MODER_MODE12_1); // output
+    GPIOA->MODER &= ~GPIO_MODER_MODE9; // input
 }
 
 
